@@ -34,7 +34,11 @@ def readsvn(data,urli,proxys):
                 dir_list = dir_list + ";" + old_line
                 #print urli + old_line
                 proxy = {"http": random.choice(proxys)}
-                d=requests.get(urli+old_line + "/.svn/entries", verify=False, proxies=proxy)
+                try:
+                    d=requests.get(urli+old_line + "/.svn/entries", verify=False, proxies=proxy)
+                except:
+                    d=requests.get(urli+old_line + "/.svn/entries", verify=False )
+
                 readsvn(d,urli+old_line,proxys)
         old_line = a
     return file_list,dir_list,user
@@ -108,7 +112,11 @@ def save_url_svn(url,filename,proxys):
     if not folder.endswith(os.path.sep):
         folder = folder  + os.path.sep
     proxy = {"http": random.choice(proxys)}
-    r=requests.get(url + "/.svn/text-base/" + filename + ".svn-base", verify=False,proxies=proxy)
+    try:
+        r=requests.get(url + "/.svn/text-base/" + filename + ".svn-base", verify=False,proxies=proxy)
+    except:
+        r=requests.get(url + "/.svn/text-base/" + filename + ".svn-base", verify=False)
+
     with open(folder + filename,"wb") as f:
         f.write(r.content)
     return 0
@@ -176,7 +184,10 @@ This program actually automates the directory navigation and text extraction pro
                 os.makedirs(folder_path)
         if not x.entries:
             print "Checking for presence of wc.db"
-            r=requests.get(url + "/.svn/wc.db", verify=False,allow_redirects=False,proxies=proxy)
+            try:
+                r=requests.get(url + "/.svn/wc.db", verify=False,allow_redirects=False,proxies=proxy)
+            except:
+                r=requests.get(url + "/.svn/wc.db", verify=False,allow_redirects=False)
             if r.status_code == 200:
                 print "WC.db found"
                 rwc=readwc(r,url,proxys)
@@ -193,7 +204,11 @@ This program actually automates the directory navigation and text extraction pro
         if not x.wcdb:
             print "lets see if we can find .svn/entries"
             #disabling redirection to make sure no redirection based 200ok is captured.
-            r=requests.get(url + "/.svn/entries", verify=False,allow_redirects=False,proxies=proxy)
+            try:
+                r=requests.get(url + "/.svn/entries", verify=False,allow_redirects=False,proxies=proxy)
+            except:
+                r=requests.get(url + "/.svn/entries", verify=False,allow_redirects=False)
+
             if r.status_code == 200:
                 print "SVN Entries Found if no file listed check wc.db too"
                 data=readsvn(r,url,proxys)
